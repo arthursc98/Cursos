@@ -1,0 +1,1 @@
+The mini project of this section of the course file is in /ud120-projects/svm, go check it out!!
