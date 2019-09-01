@@ -1,0 +1,333 @@
+Lesson 5
+========================================================
+
+### Multivariate Data
+Notes:
+
+***
+
+### Moira Perceived Audience Size Colored by Age
+Notes:
+
+***
+```{r Importing data}
+pf<-read.csv('pseudo_facebook.tsv',sep='\t')
+```
+
+### Third Qualitative Variable
+Notes:
+
+```{r Third Qualitative Variable}
+library(ggplot2)
+ggplot(aes(x = gender, y = age),
+       data = subset(pf, !is.na(gender))) + geom_boxplot()+
+  stat_summary(fun.y=mean,geom='point',shape=4)
+ggplot(aes(x=age,y=friend_count),data=subset(pf,!is.na(gender)))+
+  geom_line(aes(color=gender),stat='summary',fun.y=mean)
+```
+
+```{r Quiz}
+library(dplyr)
+grouped_data<-group_by(pf,age,gender)
+grouped_data<-filter(grouped_data,!is.na(gender))
+pf.fc_by_age_gender<-summarise(grouped_data,
+                               mean_friend_count=mean(friend_count),
+                               median_friend_count=median(friend_count),
+                               n=n())
+pf.fc_by_age_gender<-ungroup(pf.fc_by_age_gender)
+pf.fc_by_age_gender<-arrange(pf.fc_by_age_gender,age)
+pf.fc_by_age_gender
+```
+
+***
+
+### Plotting Conditional Summaries
+Notes:
+
+```{r Plotting Conditional Summaries}
+ggplot(pf.fc_by_age_gender,aes(y=median_friend_count,x=age))+
+  geom_line(aes(color=gender))
+```
+
+***
+
+### Thinking in Ratios
+Notes:
+
+***
+
+### Wide and Long Format
+Notes:
+
+***
+
+### Reshaping Data
+Notes:
+
+```{r}
+library(reshape2)
+pf.fc_by_age_gender.wide<-dcast(pf.fc_by_age_gender,
+                                age~gender,
+                                value.var = 'median_friend_count')
+pf.fc_by_age_gender.wide
+```
+
+
+***
+
+### Ratio Plot
+Notes:
+
+```{r Ratio Plot}
+ggplot(pf.fc_by_age_gender.wide,aes(x=age,y=female/male))+
+  geom_hline(yintercept = 1,linetype= 'dashed')+
+  geom_line()
+```
+
+***
+
+### Third Quantitative Variable
+Notes:
+
+```{r Third Quantitative Variable}
+pf$year_joined<-floor(2014-pf$tenure/365)
+```
+
+***
+
+### Cut a Variable
+Notes:
+
+```{r Cut a Variable}
+year_joined.bucket<-cut(pf$year_joined,breaks =c(2004,2009,2011,2012,2014))
+pf$year_joined.bucket<-year_joined.bucket
+table(pf$year_joined.bucket)
+```
+
+***
+
+### Plotting it All Together
+Notes:
+
+```{r Plotting it All Together}
+table(pf$year_joined.bucket,useNA='ifany')
+ggplot(aes(x=age,y=friend_count),data=subset(pf,!is.na(gender)))+
+  geom_line(aes(color=gender),stat='summary',fun.y=median)
+```
+
+```{r Quiz}
+table(pf$year_joined.bucket,useNA='ifany')
+ggplot(aes(x=age,y=friend_count),data=subset(pf,!is.na(year_joined.bucket)))+
+  geom_line(aes(color=year_joined.bucket),stat='summary',fun.y=median)
+```
+
+***
+
+### Plot the Grand Mean
+Notes:
+
+```{r Plot the Grand Mean}
+ggplot(aes(x=age,y=friend_count),data=subset(pf,!is.na(year_joined.bucket)))+
+  geom_line(aes(color=year_joined.bucket),stat='summary',fun.y=mean)+
+  geom_line(stat='summary',linestyle=2,fun.y=mean)
+```
+
+***
+
+### Friending Rate
+Notes:
+
+```{r Friending Rate}
+summary(subset(pf,tenure>=1)$friend_count/subset(pf,tenure>=1)$tenure)
+```
+
+***
+
+### Friendships Initiated
+Notes:
+
+What is the median friend rate?
+0.2205
+What is the maximum friend rate?
+417.0000 
+```{r Friendships Initiated}
+ggplot(aes(x=tenure,y=friendships_initiated/tenure),data=subset(pf,tenure>=1))+
+  geom_line(aes(color=year_joined.bucket))
+```
+
+***
+
+### Bias-Variance Tradeoff Revisited
+Notes:
+
+```{r Bias-Variance Tradeoff Revisited}
+
+ggplot(aes(x = tenure, y = friendships_initiated / tenure),
+       data = subset(pf, tenure >= 1)) +
+  geom_line(aes(color = year_joined.bucket),
+            stat = 'summary',
+            fun.y = mean)
+
+ggplot(aes(x = 7 * round(tenure / 7), y = friendships_initiated / tenure),
+       data = subset(pf, tenure > 0)) +
+  geom_line(aes(color = year_joined.bucket),
+            stat = "summary",
+            fun.y = mean)
+
+ggplot(aes(x = 30 * round(tenure / 30), y = friendships_initiated / tenure),
+       data = subset(pf, tenure > 0)) +
+  geom_line(aes(color = year_joined.bucket),
+            stat = "summary",
+            fun.y = mean)
+
+ggplot(aes(x = 90 * round(tenure / 90), y = friendships_initiated / tenure),
+       data = subset(pf, tenure > 0)) +
+  geom_line(aes(color = year_joined.bucket),
+            stat = "summary",
+            fun.y = mean)
+
+```
+
+```{r Change line to smooth in our first graph}
+ggplot(aes(x=tenure,y=friendships_initiated/tenure),data=subset(pf,tenure>=1))+
+  geom_smooth(aes(color=year_joined.bucket))
+```
+
+***
+
+### Sean's NFL Fan Sentiment Study
+Notes:
+
+***
+
+### Introducing the Yogurt Data Set
+Notes:
+
+***
+
+### Histograms Revisited
+Notes:
+
+```{r Histograms Revisited}
+yo<-read.csv('yogurt.csv')
+yo$id<-factor(yo$id)
+```
+
+```{r Quiz}
+ggplot(data=yo,aes(x=price))+
+  geom_histogram(binwidth = 10)
+```
+
+***
+
+### Number of Purchases
+Notes:
+
+```{r Number of Purchases}
+summary(yo)
+length(unique(yo$price))
+table(yo$price)
+```
+
+***
+```{r Quiz}
+yo<-transform(yo,all.purchases=strawberry+blueberry+pina.colada+plain+mixed.berry)
+yo
+```
+
+### Prices over Time
+Notes:
+
+```{r Prices over Time}
+ggplot(data=yo,aes(x=all.purchases))+
+  geom_histogram(binwidth = 1)
+```
+
+***
+
+```{r Quiz Price X Time}
+ggplot(data=yo,aes(x=time,y=price))+
+  geom_point()
+```
+
+### Sampling Observations
+Notes:
+
+***
+
+### Looking at Samples of Households
+
+```{r Looking at Sample of Households}
+set.seed(4230)
+sample.ids<-sample(levels(yo$id),16)
+
+ggplot(aes(x=time,y=price),data=subset(yo,id %in% sample.ids))+
+  facet_wrap(~id)+
+  geom_line()+
+  geom_point(aes(size=all.purchases),pch=1)
+```
+
+***
+
+### The Limits of Cross Sectional Data
+Notes:
+
+***
+
+### Many Variables
+Notes:
+
+***
+
+### Scatterplot Matrix
+```{r}
+library(GGally)
+theme_set(theme_minimal(20))
+
+set.seed(1836)
+pf_subset<-pf[,c(2:15)]
+names(pf_subset)
+ggpairs(pf_subset[sample.int(nrow(pf_subset),1000),])
+```
+
+Notes:
+
+***
+
+### Even More Variables
+Notes:
+
+***
+
+### Heat Maps
+Notes:
+
+```{r}
+nci <- read.table("nci.tsv")
+colnames(nci) <- c(1:64)
+```
+
+```{r}
+library(reshape2)
+library(dplyr)
+nci.long.samp <- melt(as.matrix(nci[1:200,]))
+names(nci.long.samp) <- c("gene", "case", "value")
+head(nci.long.samp)
+
+ggplot(aes(y = gene, x = case, fill = value),
+  data = nci.long.samp) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(c("blue", "red"))(100))
+```
+
+
+***
+
+### Analyzing Three of More Variables
+Reflection:
+
+***
+
+Click **KnitHTML** to see all of your hard work and to have an html
+page of this lesson, your answers, and your notes!
+

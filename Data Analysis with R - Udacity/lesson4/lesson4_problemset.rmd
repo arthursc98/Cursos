@@ -1,0 +1,69 @@
+---
+title: "lesson4 ProblemSet"
+author: "Arthur Chaves"
+date: "12/08/2019"
+output: html_document
+---
+
+```{r Loading Dataset}
+library(ggplot2)
+df<-diamonds
+```
+
+```{r Plotting a Histogram of price}
+ggplot(data = df,aes(x=price))+
+  geom_histogram(bins=20)
+```
+
+```{r Summary of Price}
+summary(df$price)
+```
+
+```{r Diamonds Count}
+dim(subset(diamonds,price<500))
+dim(subset(diamonds,price<250))
+dim(subset(diamonds,price>=15000))
+```
+
+```{r Histogram of prices}
+ggplot(data=df,aes(x=price))+
+  geom_histogram(binwidth = 20)+
+  scale_x_continuous(limits = c(300,1500),breaks = seq(300,1500,100))
+```
+
+```{r Histogram of price by cut}
+ggplot(data=df,aes(x=price))+
+  geom_histogram()+
+  facet_wrap(~cut,ncol=1)
+```
+
+```{r Summary of price by cut}
+by(df$price,df$cut,summary)
+```
+
+```{r Histogram of price by cut with scales y}
+ggplot(data=df,aes(x=price))+
+  geom_histogram()+
+  facet_wrap(~cut,ncol=1,scales='free_y')
+```
+
+```{r Histogram of price per carat}
+qplot(data = df, x = price/carat) +
+  scale_x_log10() +
+  facet_wrap(~cut, ncol = 1, scales = 'free_y')
+```
+
+```{r Boxplot of price and cut}
+qplot(data=df,x=cut,y=price,geom = 'boxplot')
+```
+
+```{r IQR = Q3-Q1}
+summary(subset(df,df$color=='D'))
+summary(subset(df,df$color=='J'))
+```
+
+```{r Analyzing carat using frequency polygon}
+qplot(data=df,x=carat,geom = 'freqpoly',binwidth=0.007)+
+  scale_x_continuous(limits=c(0,1.5),breaks=seq(0,1.5,0.1))
+```
+
